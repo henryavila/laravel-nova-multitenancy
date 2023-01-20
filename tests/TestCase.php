@@ -2,9 +2,9 @@
 
 namespace HenryAvila\LaravelNovaMultitenancy\Tests;
 
+use HenryAvila\LaravelNovaMultitenancy\LaravelNovaMultitenancyServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use HenryAvila\LaravelNovaMultitenancy\LaravelNovaMultitenancyServiceProvider;
 
 class TestCase extends Orchestra
 {

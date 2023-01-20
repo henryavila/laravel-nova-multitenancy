@@ -6,8 +6,8 @@ use HenryAvila\LaravelNovaMultitenancy\Models\Tenant;
 
 class ClearTenantSessionListener
 {
-	public function handle($event)
-	{
-		session()->remove(Tenant::TENANT_SELECTOR_SESSION_ID);
-	}
+    public function handle($event)
+    {
+        session()->remove(Tenant::TENANT_SELECTOR_SESSION_ID);
+    }
 }

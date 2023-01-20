@@ -10,20 +10,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Tenant extends \Spatie\Multitenancy\Models\Tenant
 {
-	const TENANT_SELECTOR_SESSION_ID = 'tenant-id-selector';
+    const TENANT_SELECTOR_SESSION_ID = 'tenant-id-selector';
 
-	/**
-	 * Is there any Tenant selected
-	 */
-	public static function hasSelected(): bool
-	{
-		return Tenant::checkCurrent();
-	}
+    /**
+     * Is there any Tenant selected
+     */
+    public static function hasSelected(): bool
+    {
+        return Tenant::checkCurrent();
+    }
 
-	public function users(): BelongsToMany
-	{
-		return $this->belongsToMany(User::class)
-			->withPivot('primary');
-	}
-
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class)
+            ->withPivot('primary');
+    }
 }
