@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+	public function up()
+	{
+		Schema::create('tenants', function (Blueprint $table) {
+			$table->id();
+			$table->string('name', 128);
+			$table->string('timezone', 64);
+			$table->unsignedBigInteger('disk_quota_in_bytes')->nullable();
+			$table->unsignedBigInteger('disk_usage_in_bytes')->nullable();
+
+			$table->timestamps();
+			$table->softDeletes();
+		});
+
+		Schema::create('tenant_user', function (Blueprint $table) {
+			$table->foreignIdFor(\App\Models\User::class);
+			$table->foreignIdFor(\HenryAvila\LaravelNovaMultitenancy\Models\Tenant::class);
+			$table->boolean('default')->default(false);
+
+			$table->timestamps();
+		});
+	}
+
+	public function down()
+	{
+		Schema::dropIfExists('tenant_user');
+		Schema::dropIfExists('tenants');
+	}
+};

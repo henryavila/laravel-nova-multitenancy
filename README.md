@@ -1,69 +1,116 @@
-# :package_description
+# Integrate the multitenancy single database in Laravel Nova.
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/:vendor_slug/:package_slug/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/:vendor_slug/:package_slug/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-<!--delete-->
----
-This repo can be used to scaffold a Laravel package. Follow these steps to get started:
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/henryavila/laravel-nova-multitenancy.svg?style=flat-square)](https://packagist.org/packages/henryavila/laravel-nova-multitenancy)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/henryavila/laravel-nova-multitenancy/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/henryavila/laravel-nova-multitenancy/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/henryavila/laravel-nova-multitenancy/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/henryavila/laravel-nova-multitenancy/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/henryavila/laravel-nova-multitenancy.svg?style=flat-square)](https://packagist.org/packages/henryavila/laravel-nova-multitenancy)
 
-1. Press the "Use this template" button at the top of this repo to create a new repo with the contents of this skeleton.
-2. Run "php ./configure.php" to run a script that will replace all placeholders throughout all the files.
-3. Have fun creating your package.
-4. If you need help creating a package, consider picking up our <a href="https://laravelpackage.training">Laravel Package Training</a> video course.
----
-<!--/delete-->
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+Integrate the multitenancy single database in Laravel Nova.
 
-## Support us
-
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/:package_name.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/:package_name)
-
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
-
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+This package is based on https://spatie.be/docs/laravel-multitenancy. So logic and config of spatie/laravel-multitenancy
+still aplies
 
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require :vendor_slug/:package_slug
+composer require henryavila/laravel-nova-multitenancy
 ```
 
-You can publish and run the migrations with:
+You can publish the config, view and migrations with:
 
 ```bash
-php artisan vendor:publish --tag=":package_slug-migrations"
+php artisan vendor:publish --provider="HenryAvila\LaravelNovaMultitenancy\LaravelNovaMultitenancyServiceProvider" 
+```
+
+The views file will be published, personalize it at your will.
+Don't forget to run `npm run build`
+
+
+You can run the migration with (To create the Tenant table)
+
+```bash
 php artisan migrate
 ```
 
-You can publish the config file with:
 
-```bash
-php artisan vendor:publish --tag=":package_slug-config"
-```
-
-This is the contents of the published config file:
+Edit the `app\Http\Kernel.php` file adding an entry in web group and creating the tenant group
 
 ```php
-return [
+protected $middlewareGroups = [
+    // ...
+    
+    'web' => [
+        // ...
+        \HenryAvila\LaravelNovaMultitenancy\Http\Middleware\SetTenantMiddleware::class,
+    ],
+    
+    // ...
+    
+    'tenant' => [
+        \HenryAvila\LaravelNovaMultitenancy\Http\Middleware\NeedsTenant::class,
+        \HenryAvila\LaravelNovaMultitenancy\Http\Middleware\EnsureValidTenantSession::class,
+    ]
 ];
 ```
 
-Optionally, you can publish the views using
+If you activated (User Impersonation)[https://nova.laravel.com/docs/4.0/customization/impersonation.html] 
+on Laravel Nova, you must set up this event Listeners.
 
-```bash
-php artisan vendor:publish --tag=":package_slug-views"
+Edit the file `App\Providers\EventServiceProvider`
+
+```php
+ protected $listen = [
+        \Laravel\Nova\Events\StartedImpersonating::class  => [
+            \HenryAvila\LaravelNovaMultitenancy\Listeners\ClearTenantSessionListener::class,
+        ],
+        \Laravel\Nova\Events\StoppedImpersonating::class => [
+            \HenryAvila\LaravelNovaMultitenancy\Listeners\ClearTenantSessionListener::class,
+        ],
+];
+```
+
+Add the Trait `HenryAvila\LaravelNovaMultitenancy\Traits\User` in your `User` model
+
+If you whant to customize the Tenant model, change it in config file
+
+Add the trait `\HenryAvila\LaravelNovaMultitenancy\Traits\ModelWithTenant` to all models that are tenant aware
+
+Add to your `database` file a `tenant_connection` entry with the tenate db conneciton. See:
+```php
+return [
+// database.php
+    /*
+    |--------------------------------------------------------------------------
+    | Default Database Connection Name
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify which of the database connections below you wish
+    | to use as your default connection for all database work. Of course
+    | you may use many connections at once using the Database library.
+    |
+    */
+
+    'default' => env('DB_CONNECTION', 'mysql'),
+
+    'tenant_connection' => env('DB_TENANT_CONNECTION', 'tenant'), // <<== ADD THIS
 ```
 
 ## Usage
 
+To protect an specift route, just add the 'tenant' middleware to route
 ```php
-$variable = new VendorName\Skeleton();
-echo $variable->echoPhrase('Hello, VendorName!');
+// in a routes file
+
+Route::middleware('tenant')->group(function() {
+    // routes
+});
 ```
+
+
+If you receite an error: `Route [login] not defined.`. 
+Remember to change the route from `login` to `nova.login` in your `App\Http\MiddlewareAuthenticate\` file 
 
 ## Testing
 
@@ -85,7 +132,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
-- [:author_name](https://github.com/:author_username)
+- [Henry Ávila](https://github.com/henryavila)
 - [All Contributors](../../contributors)
 
 ## License

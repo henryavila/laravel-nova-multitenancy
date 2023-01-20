@@ -1,12 +1,12 @@
 <?php
 
-namespace VendorName\Skeleton\Commands;
+namespace HenryAvila\LaravelNovaMultitenancy\Commands;
 
 use Illuminate\Console\Command;
 
-class SkeletonCommand extends Command
+class LaravelNovaMultitenancyCommand extends Command
 {
-    public $signature = 'skeleton';
+    public $signature = 'laravel-nova-multitenancy';
 
     public $description = 'My command';
 
