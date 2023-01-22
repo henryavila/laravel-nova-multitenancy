@@ -73,13 +73,8 @@ class SetTenantMiddleware
             return $next($request);
         }
 
-        if ($totalTenants > 1) {
+        if ($user->isSuperAdmin() || $totalTenants > 1) {
             return redirect()->route('select-tenant');
-        }
-
-        // In last case, lets Allow the superAdmin to login
-        if ($user->isSuperAdmin()) {
-            return $next($request);
         }
 
         Auth::logout();
