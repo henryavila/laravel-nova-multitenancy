@@ -30,16 +30,18 @@ class User extends \Illuminate\Foundation\Auth\User
     /**
      * @return Tenant|null
      */
-    public function getActualUserTenant()
-    {
-        $tenant = Tenant::current();
+	public function getActualUserTenant(): ?Tenant
+	{
+		$currentTenant = Tenant::current();
 
-        if ($this->userBelongsToTenant($tenant)) {
-            return $tenant;
-        }
+		foreach ($this->tenants as $tenant) {
+			if ($tenant->id === $currentTenant->id && $this->userBelongsToTenant($tenant)) {
+				return $tenant;
+			}
+		}
 
-        return null;
-    }
+		return null;
+	}
 
     public function userBelongsToTenant(Tenant $tenant): bool
     {
