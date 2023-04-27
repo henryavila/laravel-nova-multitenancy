@@ -10,6 +10,13 @@ Integrate the multitenancy single database in Laravel Nova.
 This package is based on https://spatie.be/docs/laravel-multitenancy. So logic and config of spatie/laravel-multitenancy
 still aplies
 
+## v2.0.0
+Another option to don't define the tenant to an route is set the following `default` data to route declaration
+```php
+Route::get('/', [Controller::class, 'index'])
+		->defaults(\HenryAvila\LaravelNovaMultitenancy\LaravelNovaMultitenancy::SKIP_ROUTE, true);
+```
+
 ## Installation
 
 You can install the package via composer:
