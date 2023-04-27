@@ -23,8 +23,6 @@ class SelectTenantController extends Controller
 
     /**
      * Show the selection screen
-     *
-     * @param  Request  $request
      */
     public function index(Request $request)
     {

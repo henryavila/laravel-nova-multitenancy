@@ -27,9 +27,6 @@ class User extends \Illuminate\Foundation\Auth\User
             ->withPivot('primary');
     }
 
-    /**
-     * @return Tenant|null
-     */
     public function getActualUserTenant(): ?Tenant
     {
         $currentTenant = Tenant::current();
