@@ -2,6 +2,12 @@
 
 All notable changes to `laravel-nova-multitenancy` will be documented in this file.
 
+## v2.2.0 - 2023-05-04
+
+Allow to run a invokable class when tenant is selected
+
+**Full Changelog**: https://github.com/henryavila/laravel-nova-multitenancy/compare/2.1.0...2.2.0
+
 ## v2.1.0 - 2023-05-04
 
 - Allow to define if the route is tenant specific on route declaration
