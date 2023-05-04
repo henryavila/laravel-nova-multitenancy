@@ -1,6 +1,6 @@
 {
     "name": "henryavila/laravel-nova-multitenancy",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "Integrate the multitenancy single database in Laravel Nova.",
     "keywords": [
         "henryavila",

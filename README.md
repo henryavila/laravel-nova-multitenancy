@@ -21,6 +21,8 @@ If the `Tenant` has `domains` relationship, allow to define the current tenant b
 The `domains` relation model, must contain an `fqdn` attribute with the fqdn domain 
 
 
+Allow to run a invokable class when tenant is selected (See config file)
+
 ## Installation
 
 You can install the package via composer:

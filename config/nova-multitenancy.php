@@ -38,8 +38,8 @@ return [
 
     'tenant_not_found_message' => 'Você precisa estar vinculado a alguma conta.',
 
-    // This callback will always be executed after the Tenant has been set as current tenant
-    'execute_after_tenant_selection' => fn () => null,
+    // This invokable class will be executed after the Tenant has been set as current tenant
+    'invoke_after_tenant_selection' => null,
 
     /*
      * This class is responsible for determining which tenant should be current
