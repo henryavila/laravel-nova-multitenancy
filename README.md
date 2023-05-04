@@ -17,6 +17,10 @@ Route::get('/', [Controller::class, 'index'])
 		->defaults(\HenryAvila\LaravelNovaMultitenancy\LaravelNovaMultitenancy::SKIP_ROUTE, true);
 ```
 
+If the `Tenant` has `domains` relationship, allow to define the current tenant based on current domain.
+The `domains` relation model, must contain an `fqdn` attribute with the fqdn domain 
+
+
 ## Installation
 
 You can install the package via composer:
