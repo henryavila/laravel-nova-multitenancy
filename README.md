@@ -31,7 +31,7 @@ You can install the package via composer:
 composer require henryavila/laravel-nova-multitenancy
 ```
 
-You can publish the config, view and migrations with:
+You can publish the config, view, migrations and translation with:
 
 ```bash
 php artisan vendor:publish --provider="HenryAvila\LaravelNovaMultitenancy\LaravelNovaMultitenancyServiceProvider" 
@@ -71,7 +71,7 @@ protected $middlewareGroups = [
 If you activated (User Impersonation)[https://nova.laravel.com/docs/4.0/customization/impersonation.html] 
 on Laravel Nova, you must set up this event Listeners.
 
-Edit the file `App\Providers\EventServiceProvider`
+Edit the file `App\Providers\EventServiceProvider` and add:
 
 ```php
  protected $listen = [
@@ -84,35 +84,25 @@ Edit the file `App\Providers\EventServiceProvider`
 ];
 ```
 
-Add the Trait `HenryAvila\LaravelNovaMultitenancy\Traits\User` in your `User` model
+Make your `User` model extends `\HenryAvila\LaravelNovaMultitenancy\Models\User`
 
-If you whant to customize the Tenant model, change it in config file
+If you want to customize the Tenant model, change it in config file
 
 Add the trait `\HenryAvila\LaravelNovaMultitenancy\Traits\ModelWithTenant` to all models that are tenant aware
 
-Add to your `database` file a `tenant_connection` entry with the tenate db conneciton. See:
+Add to your `database` file a `tenant_connection` entry with the tenant db connection. See:
 ```php
 return [
-// database.php
-    /*
-    |--------------------------------------------------------------------------
-    | Default Database Connection Name
-    |--------------------------------------------------------------------------
-    |
-    | Here you may specify which of the database connections below you wish
-    | to use as your default connection for all database work. Of course
-    | you may use many connections at once using the Database library.
-    |
-    */
-
-    'default' => env('DB_CONNECTION', 'mysql'),
-
-    'tenant_connection' => env('DB_TENANT_CONNECTION', 'tenant'), // <<== ADD THIS
+    // database.php
+    'tenant_connection' => env('DB_TENANT_CONNECTION', 'tenant'),
 ```
+
+And don't forget to configure this connection
+**OBS: The default connection will be used to the *Landlord* database and the *tenant_connection* to the tenant database **
 
 ## Usage
 
-To protect an specift route, just add the 'tenant' middleware to route
+To protect an specific route, just add the 'tenant' middleware to route
 ```php
 // in a routes file
 
@@ -123,7 +113,13 @@ Route::middleware('tenant')->group(function() {
 
 
 If you receite an error: `Route [login] not defined.`. 
-Remember to change the route from `login` to `nova.login` in your `App\Http\MiddlewareAuthenticate\` file 
+Remember to change the route from `login` to `nova.login` in your `App\Http\Middleware\Authenticate` file 
+```php
+protected function redirectTo($request)
+{
+    return $request->expectsJson() ? null : route('nova.login');
+}
+```
 
 ## Testing
 
