@@ -4,6 +4,7 @@ namespace HenryAvila\LaravelNovaMultitenancy\Traits;
 
 use HenryAvila\LaravelNovaMultitenancy\Observers\ModelWithTenantObserver;
 use HenryAvila\LaravelNovaMultitenancy\Scopes\TenantScope;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Trait ModelWithTenant
@@ -14,26 +15,62 @@ use HenryAvila\LaravelNovaMultitenancy\Scopes\TenantScope;
  */
 trait ModelWithTenant
 {
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct($attributes);
-        $this->setConnection(config('database.tenant_connection'));
-    }
+	/**
+	 * Name of all columns from this model that has the size of the file
+	 */
+	protected static array $fileSizeColumns = [];
 
-    /**
-     * The "booted" method of the model.
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        parent::boot();
-        static::addGlobalScope(new TenantScope());
-        static::observe(new ModelWithTenantObserver());
-    }
+	public function __construct(array $attributes = [])
+	{
+		parent::__construct($attributes);
+		$this->setConnection(config('database.tenant_connection'));
+	}
 
-    public function tenant()
-    {
-        return $this->belongsTo(config('nova-multitenancy.tenant_model'));
-    }
+	protected static function boot(): void
+	{
+		parent::boot();
+		static::addGlobalScope(new TenantScope());
+		static::observe(new ModelWithTenantObserver());
+	}
+
+
+	protected static function booted(): void
+	{
+		parent::booted();
+
+		static::created(function (Model $file) {
+			$file->load('tenant');
+			foreach (static::$fileSizeColumns as $column) {
+				$file->tenant->updateDiskUsage($file->$column);
+			}
+		});
+
+		static::updating(function (Model $file) {
+
+			foreach (static::$fileSizeColumns as $column) {
+				if ($file->isDirty($column)) {
+					$file->load('tenant');
+
+					$totalSize = $file->$column - $file->getOriginal($column);
+					$file->tenant->updateDiskUsage($totalSize);
+				}
+			}
+
+
+		});
+
+		static::forceDeleted(function (Model $file) {
+			$originalSize = $file->getOriginal('size');
+			if ($originalSize) {
+				$file->load('tenant');
+
+				$file->tenant->updateDiskUsage(-$originalSize);
+			}
+		});
+	}
+
+	public function tenant()
+	{
+		return $this->belongsTo(config('nova-multitenancy.tenant_model'));
+	}
 }

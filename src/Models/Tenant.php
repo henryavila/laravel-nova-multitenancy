@@ -2,27 +2,86 @@
 
 namespace HenryAvila\LaravelNovaMultitenancy\Models;
 
-use Illuminate\Database\Eloquent\Collection;
+use DateTimeZone;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
- * @property array<User>|Collection $tenants
+ * @property int disk_usage_in_bytes
  */
 class Tenant extends \Spatie\Multitenancy\Models\Tenant
 {
-    const TENANT_SELECTOR_SESSION_ID = 'tenant-id-selector';
+	const TENANT_SELECTOR_SESSION_ID = 'tenant-id-selector';
 
-    /**
-     * Is there any Tenant selected
-     */
-    public static function hasSelected(): bool
-    {
-        return Tenant::checkCurrent();
-    }
+	protected $casts = [
+		'disk_quota_in_bytes' => 'int',
+		'disk_usage_in_bytes' => 'int'
+	];
 
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class)
-            ->withPivot('primary');
-    }
+	/**
+	 * Is there any Tenant selected
+	 */
+	public static function hasSelected(): bool
+	{
+		return Tenant::checkCurrent();
+	}
+
+	public function users(): BelongsToMany
+	{
+		return $this->belongsToMany(User::class)
+		            ->withPivot('primary');
+	}
+
+	public function updateDiskUsage(int $bytes): void
+	{
+		$this->disk_usage_in_bytes += $bytes;
+		$this->save();
+	}
+
+	public static function getAllTimezoneList(): array
+	{
+		$list = DateTimeZone::listIdentifiers();
+
+		return array_combine($list, $list);
+	}
+
+
+	public function diskQuotaInBytes(): Attribute
+	{
+		return new Attribute(
+			get: fn($value) => empty($value) ? null : $value * 1024 * 1024 * 1024,
+			set: fn($value) => empty($value) ? null : $value / 1024 / 1024 / 1024,
+		);
+	}
+
+	public function diskSpaceAvailable(): Attribute
+	{
+		return new Attribute(
+			get: function () {
+				if (!$this->hasLimitedDiskQuota()) {
+					return null;
+				}
+
+				return $this->disk_quota_in_bytes - $this->disk_usage_in_bytes;
+			}
+		);
+	}
+
+	public function hasLimitedDiskQuota(): bool
+	{
+		return $this->disk_quota_in_bytes !== null;
+	}
+
+	public function canUploadNewFiles(): Attribute
+	{
+		return new Attribute(
+			get: function () {
+				if (!$this->hasLimitedDiskQuota()) {
+					return true;
+				}
+
+				return $this->disk_usage_in_bytes < $this->disk_quota_in_bytes;
+			}
+		);
+	}
 }

@@ -30,13 +30,12 @@ return [
         //...
     ],
 
+
     // Class that contain the fqdn attribute. The Tenant model must contain an HasMany `domains` relation for this model
     // if null, will deactivate the Tenant finder by domain
     'domain_class' => null,
 
     'fqdn_column' => 'fqdn',
-
-    'tenant_not_found_message' => 'Você precisa estar vinculado a alguma conta.',
 
     // This invokable class will be executed after the Tenant has been set as current tenant
     'invoke_after_tenant_selection' => null,

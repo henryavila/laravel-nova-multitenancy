@@ -97,12 +97,18 @@ return [
     'tenant_connection' => env('DB_TENANT_CONNECTION', 'tenant'),
 ```
 
-And don't forget to configure this connection
-**OBS: The default connection will be used to the *Landlord* database and the *tenant_connection* to the tenant database **
+This is the relation between the connections and the database   
+
+| Name              | Database |
+|-------------------|--|
+| default           | Landlord database |
+| tenant_connection | Tenant database |
+
+**PS.:** Don't forget to create this connections in `database.connections` config file.
 
 ## Usage
 
-To protect an specific route, just add the 'tenant' middleware to route
+To protect a specific route, just add the 'tenant' middleware to route
 ```php
 // in a routes file
 
