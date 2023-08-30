@@ -5,6 +5,7 @@ namespace HenryAvila\LaravelNovaMultitenancy\Traits;
 use HenryAvila\LaravelNovaMultitenancy\Observers\ModelWithTenantObserver;
 use HenryAvila\LaravelNovaMultitenancy\Scopes\TenantScope;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Trait ModelWithTenant
@@ -46,27 +47,38 @@ trait ModelWithTenant
 		});
 
 		static::updating(function (Model $file) {
-
 			foreach (static::$fileSizeColumns as $column) {
 				if ($file->isDirty($column)) {
-					$file->load('tenant');
 
+					$file->load('tenant');
 					$totalSize = $file->$column - $file->getOriginal($column);
 					$file->tenant->updateDiskUsage($totalSize);
 				}
 			}
-
-
 		});
 
-		static::forceDeleted(function (Model $file) {
-			$originalSize = $file->getOriginal('size');
-			if ($originalSize) {
-				$file->load('tenant');
 
-				$file->tenant->updateDiskUsage(-$originalSize);
-			}
-		});
+		if (in_array(SoftDeletes::class, class_uses(static::class))) {
+			static::forceDeleted(function (Model $file) {
+				foreach (static::$fileSizeColumns as $column) {
+					$originalSize = $file->getOriginal($column);
+					if ($originalSize) {
+						$file->load('tenant');
+						$file->tenant->updateDiskUsage(-$originalSize);
+					}
+				}
+			});
+		} else {
+			static::deleted(function (Model $file) {
+				foreach (static::$fileSizeColumns as $column) {
+					$originalSize = $file->getOriginal($column);
+					if ($originalSize) {
+						$file->load('tenant');
+						$file->tenant->updateDiskUsage(-$originalSize);
+					}
+				}
+			});
+		}
 	}
 
 	public function tenant()

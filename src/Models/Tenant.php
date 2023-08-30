@@ -6,15 +6,12 @@ use DateTimeZone;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-/**
- * @property int disk_usage_in_bytes
- */
 class Tenant extends \Spatie\Multitenancy\Models\Tenant
 {
 	const TENANT_SELECTOR_SESSION_ID = 'tenant-id-selector';
 
 	protected $casts = [
-		'disk_quota_in_bytes' => 'int',
+		'disk_quota_in_gigabytes' => 'float',
 		'disk_usage_in_bytes' => 'int'
 	];
 
@@ -49,8 +46,8 @@ class Tenant extends \Spatie\Multitenancy\Models\Tenant
 	public function diskQuotaInBytes(): Attribute
 	{
 		return new Attribute(
-			get: fn($value) => empty($value) ? null : $value * 1024 * 1024 * 1024,
-			set: fn($value) => empty($value) ? null : $value / 1024 / 1024 / 1024,
+			get: fn() => empty($this->disk_quota_in_gigabytes) ? null : round($this->disk_quota_in_gigabytes * 1024 * 1024 * 1024, 0),
+			set: fn() => empty($this->disk_quota_in_gigabytes) ? null : $this->disk_quota_in_gigabytes / 1024 / 1024 / 1024,
 		);
 	}
 
