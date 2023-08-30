@@ -9,118 +9,114 @@ use Illuminate\Support\Facades\Auth;
 
 class SetTenantMiddleware
 {
-	/**
-	 * Handle an incoming request.
-	 *
-	 * @param \Illuminate\Http\Request $request
-	 * @return mixed
-	 */
-	public function handle($request, Closure $next)
-	{
-		$route = $request->route();
-		$routeName = $route ? $route->getName() : null;
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+        $route = $request->route();
+        $routeName = $route ? $route->getName() : null;
 
-		// Don't run middleware if in any route marked to be ignored
-		if (in_array($routeName, config('nova-multitenancy.routes_to_ignore'))) {
-			return $next($request);
-		}
+        // Don't run middleware if in any route marked to be ignored
+        if (in_array($routeName, config('nova-multitenancy.routes_to_ignore'))) {
+            return $next($request);
+        }
 
-		$skipRoute = LaravelNovaMultitenancy::SKIP_ROUTE;
-		if (isset($route->defaults[$skipRoute]) && $route->defaults[$skipRoute] === true) {
-			return $next($request);
-		}
+        $skipRoute = LaravelNovaMultitenancy::SKIP_ROUTE;
+        if (isset($route->defaults[$skipRoute]) && $route->defaults[$skipRoute] === true) {
+            return $next($request);
+        }
 
-		// If tenant is already defined don't run this middleware
-		if (Tenant::current() !== null) {
-			return $next($request);
-		}
+        // If tenant is already defined don't run this middleware
+        if (Tenant::current() !== null) {
+            return $next($request);
+        }
 
-		// Set tenant based on Domain
-		$domainClass = config('nova-multitenancy.domain_class');
-		if (!empty($domainClass)) {
-			$host = $request->getHost();
-			$fqdn = config('nova-multitenancy.fqdn_column') ?? 'fqdn';
+        // Set tenant based on Domain
+        $domainClass = config('nova-multitenancy.domain_class');
+        if (! empty($domainClass)) {
+            $host = $request->getHost();
+            $fqdn = config('nova-multitenancy.fqdn_column') ?? 'fqdn';
 
-			$tenantByDomain = $domainClass::where($fqdn, $host)->first()?->tenant;
+            $tenantByDomain = $domainClass::where($fqdn, $host)->first()?->tenant;
 
-			if (!empty($tenantByDomain)) {
-				$this->selectTenant($tenantByDomain);
+            if (! empty($tenantByDomain)) {
+                $this->selectTenant($tenantByDomain);
 
-				return $next($request);
-			}
-		}
+                return $next($request);
+            }
+        }
 
-		// If the user came from Tenant Selection, let's get data from session and save the tenant
-		$tenantId = session()->get(Tenant::TENANT_SELECTOR_SESSION_ID);
+        // If the user came from Tenant Selection, let's get data from session and save the tenant
+        $tenantId = session()->get(Tenant::TENANT_SELECTOR_SESSION_ID);
 
-		if (!empty($tenantId)) {
-			/** @var Tenant $tenant */
-			$tenant = LaravelNovaMultitenancy::getTenantModel($tenantId);
-			if (empty($tenant)) {
-				abort(404);
-			}
+        if (! empty($tenantId)) {
+            /** @var Tenant $tenant */
+            $tenant = LaravelNovaMultitenancy::getTenantModel($tenantId);
+            if (empty($tenant)) {
+                abort(404);
+            }
 
-			$this->selectTenant($tenant);
+            $this->selectTenant($tenant);
 
-			return $next($request);
-		}
+            return $next($request);
+        }
 
-		// From this point, we have sure that: we have no tenant selected and we are not in login or select tenant routes
-		// (and not in any other route marked to be ignored)
+        // From this point, we have sure that: we have no tenant selected and we are not in login or select tenant routes
+        // (and not in any other route marked to be ignored)
 
-		$user = Auth::user();
+        $user = Auth::user();
 
+        if ($user === null) {
+            return $next($request);
+        }
 
-		if ($user === null) {
-			return $next($request);
-		}
+        // The Tenant must be set just to users that can't manage Tenants
+        $totalTenants = $user->tenants->count() ?? 0;
 
-		// The Tenant must be set just to users that can't manage Tenants
-		$totalTenants = $user->tenants->count() ?? 0;
+        if ($totalTenants === 1) {
+            $this->selectTenant($user->tenants->first());
 
+            return $next($request);
+        }
 
-		if ($totalTenants === 1) {
-			$this->selectTenant($user->tenants->first());
+        if ($totalTenants > 1) {
 
-			return $next($request);
-		}
+            $defaultTenant = $user->tenants
+                ->filter(fn ($tenant) => $tenant->pivot->primary === true)
+                ->first();
 
+            if ($defaultTenant !== null) {
+                $this->selectTenant($defaultTenant);
 
-		if ($totalTenants > 1) {
+                return $next($request);
+            }
 
-			$defaultTenant = $user->tenants
-				->filter(fn($tenant) => $tenant->pivot->primary === true)
-				->first();
+            return redirect()->route('select-tenant');
+        }
 
-			if ($defaultTenant !== null) {
-				$this->selectTenant($defaultTenant);
+        Auth::logout();
+        abort(403, trans('Você precisa estar vinculado a alguma conta.'));
+    }
 
-				return $next($request);
-			}
+    private function selectTenant(Tenant $tenant): void
+    {
+        $tenant->makeCurrent();
 
+        try {
+            $invokables = config('nova-multitenancy.invoke_after_tenant_selection');
 
-			return redirect()->route('select-tenant');
-		}
+            foreach ($invokables as $invokable) {
+                if (class_exists($invokable)) {
+                    (new $invokable)();
+                }
+            }
 
-		Auth::logout();
-		abort(403, trans('Você precisa estar vinculado a alguma conta.'));
-	}
+        } catch (\Exception) {
+        }
 
-	private function selectTenant(Tenant $tenant): void
-	{
-		$tenant->makeCurrent();
-
-		try {
-			$invokables = config('nova-multitenancy.invoke_after_tenant_selection');
-
-			foreach ($invokables as $invokable) {
-				if (class_exists($invokable)) {
-					(new $invokable)();
-				}
-			}
-
-		} catch (\Exception) {
-		}
-
-	}
+    }
 }
