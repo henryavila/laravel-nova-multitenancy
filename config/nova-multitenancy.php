@@ -30,7 +30,6 @@ return [
         //...
     ],
 
-
     // Class that contain the fqdn attribute. The Tenant model must contain an HasMany `domains` relation for this model
     // if null, will deactivate the Tenant finder by domain
     'domain_class' => null,

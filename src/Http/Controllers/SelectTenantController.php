@@ -9,41 +9,41 @@ use Illuminate\Routing\Controller;
 
 class SelectTenantController extends Controller
 {
-	public static function store(Request $request)
-	{
-		$tenantId = $request->get('tenant');
-		if (empty($tenantId) || (int)$tenantId === 0) {
-			abort(404);
-		}
+    public static function store(Request $request)
+    {
+        $tenantId = $request->get('tenant');
+        if (empty($tenantId) || (int) $tenantId === 0) {
+            abort(404);
+        }
 
-		session([Tenant::TENANT_SELECTOR_SESSION_ID => $tenantId]);
+        session([Tenant::TENANT_SELECTOR_SESSION_ID => $tenantId]);
 
-		return redirect(config('nova.path'));
-	}
+        return redirect(config('nova.path'));
+    }
 
-	/**
-	 * Show the selection screen
-	 */
-	public function index(Request $request)
-	{
-		Tenant::forgetCurrent();
+    /**
+     * Show the selection screen
+     */
+    public function index(Request $request)
+    {
+        Tenant::forgetCurrent();
 
-		/** @var User $user */
-		$user = auth()->user();
+        /** @var User $user */
+        $user = auth()->user();
 
-		if ($user->isSuperAdmin()) {
-			$build = Tenant::orderBy('name');
-		} else {
-			$build = $user->tenants()->orderBy('name');
-		}
+        if ($user->isSuperAdmin()) {
+            $build = Tenant::orderBy('name');
+        } else {
+            $build = $user->tenants()->orderBy('name');
+        }
 
-		$tenants = $build->pluck('name', 'id');
+        $tenants = $build->pluck('name', 'id');
 
-		return view(
-			'nova-multitenancy::select-tenant',
-			[
-				'tenants' => $tenants,
-			]
-		);
-	}
+        return view(
+            'nova-multitenancy::select-tenant',
+            [
+                'tenants' => $tenants,
+            ]
+        );
+    }
 }
