@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-nova-multitenancy` will be documented in this file.
 
+## v3.0.1 - 2023-08-30
+
+Fix Invoke multiple commands after tenant selection
+
 ## v2.2.0 - 2023-05-04
 
 Allow to run a invokable class when tenant is selected
