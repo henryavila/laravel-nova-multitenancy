@@ -38,7 +38,7 @@ return [
     'fqdn_column' => 'fqdn',
 
     // This invokable class will be executed after the Tenant has been set as current tenant
-    'invoke_after_tenant_selection' => null,
+    'invoke_after_tenant_selection' => [],
 
     /*
      * This class is responsible for determining which tenant should be current

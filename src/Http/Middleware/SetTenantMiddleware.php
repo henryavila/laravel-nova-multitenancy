@@ -111,10 +111,12 @@ class SetTenantMiddleware
 		$tenant->makeCurrent();
 
 		try {
-			$invokable = config('nova-multitenancy.invoke_after_tenant_selection');
+			$invokables = config('nova-multitenancy.invoke_after_tenant_selection');
 
-			if (class_exists($invokable)) {
-				(new $invokable)();
+			foreach ($invokables as $invokable) {
+				if (class_exists($invokable)) {
+					(new $invokable)();
+				}
 			}
 
 		} catch (\Exception) {
