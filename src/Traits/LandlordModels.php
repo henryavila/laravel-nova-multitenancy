@@ -2,14 +2,12 @@
 
 namespace HenryAvila\LaravelNovaMultitenancy\Traits;
 
-
 trait LandlordModels
 {
-	public function __construct(array $attributes = [])
-	{
-		parent::__construct($attributes);
+    public function __construct(array $attributes = [])
+    {
+        parent::__construct($attributes);
 
-
-		$this->setConnection(config('database.default'));
-	}
+        $this->setConnection(config('database.default'));
+    }
 }
