@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-nova-multitenancy` will be documented in this file.
 
+## v3.0.4 - 2023-09-01
+
+Fix calc of files size
+
 ## v3.0.3 - 2023-09-01
 
 Fix Tenant quota usage < 0
