@@ -60,17 +60,17 @@ class User extends \Illuminate\Foundation\Auth\User
         return $this->belongsToTenantId(Tenant::current()->id);
     }
 
-	public function userAndModelBelongsToActiveTenant(Model $model): bool
-	{
-		$belongsToCurrentTenant = $this->belongsToCurrentTenant();
+    public function userAndModelBelongsToActiveTenant(Model $model): bool
+    {
+        $belongsToCurrentTenant = $this->belongsToCurrentTenant();
 
-		if (method_exists($model, 'tenants')) {
-			return $belongsToCurrentTenant && $model->tenants()->pluck('id')->contains(Tenant::current()->id);
-		}
-		if (method_exists($model, 'tenant')) {
-			return $belongsToCurrentTenant && $model->tenant?->id === Tenant::current()->id;
-		}
+        if (method_exists($model, 'tenants')) {
+            return $belongsToCurrentTenant && $model->tenants()->pluck('id')->contains(Tenant::current()->id);
+        }
+        if (method_exists($model, 'tenant')) {
+            return $belongsToCurrentTenant && $model->tenant?->id === Tenant::current()->id;
+        }
 
-		return $belongsToCurrentTenant;
-	}
+        return $belongsToCurrentTenant;
+    }
 }
