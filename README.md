@@ -10,18 +10,6 @@ Integrate the multitenancy single database in Laravel Nova.
 This package is based on https://spatie.be/docs/laravel-multitenancy. So logic and config of spatie/laravel-multitenancy
 still aplies
 
-## v2.0.0
-Another option to don't define the tenant to an route is set the following `default` data to route declaration
-```php
-Route::get('/', [Controller::class, 'index'])
-		->defaults(\HenryAvila\LaravelNovaMultitenancy\LaravelNovaMultitenancy::SKIP_ROUTE, true);
-```
-
-If the `Tenant` has `domains` relationship, allow to define the current tenant based on current domain.
-The `domains` relation model, must contain an `fqdn` attribute with the fqdn domain 
-
-
-Allow to run a invokable class when tenant is selected (See config file)
 
 ## Installation
 
@@ -118,7 +106,7 @@ Route::middleware('tenant')->group(function() {
 ```
 
 
-If you receite an error: `Route [login] not defined.`. 
+If you receive an error: `Route [login] not defined.`. 
 Remember to change the route from `login` to `nova.login` in your `App\Http\Middleware\Authenticate` file 
 ```php
 protected function redirectTo($request)
@@ -126,6 +114,16 @@ protected function redirectTo($request)
     return $request->expectsJson() ? null : route('nova.login');
 }
 ```
+
+
+Another option to don't define the tenant to an route is set the following `default` data to route declaration
+```php
+Route::get('/', [Controller::class, 'index'])
+		->defaults(\HenryAvila\LaravelNovaMultitenancy\LaravelNovaMultitenancy::SKIP_ROUTE, true);
+```
+
+If the `Tenant` has `domains` relationship, allow to define the current tenant based on current domain.
+The `domains` relation model, must contain an `fqdn` attribute with the fqdn domain
 
 ## Testing
 

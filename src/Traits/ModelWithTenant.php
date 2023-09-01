@@ -19,7 +19,9 @@ trait ModelWithTenant
     /**
      * Name of all columns from this model that has the size of the file
      */
-    protected static array $fileSizeColumns = [];
+	protected static function getFileSizeColumns(): array {
+		return  [];
+	}
 
     public function __construct(array $attributes = [])
     {
@@ -40,13 +42,13 @@ trait ModelWithTenant
 
         static::created(function (Model $file) {
             $file->load('tenant');
-            foreach (static::$fileSizeColumns as $column) {
+            foreach (static::getFileSizeColumns() as $column) {
                 $file->tenant->updateDiskUsage($file->$column);
             }
         });
 
         static::updating(function (Model $file) {
-            foreach (static::$fileSizeColumns as $column) {
+            foreach (static::getFileSizeColumns() as $column) {
                 if ($file->isDirty($column)) {
 
                     $file->load('tenant');
@@ -58,7 +60,7 @@ trait ModelWithTenant
 
         if (in_array(SoftDeletes::class, class_uses(static::class))) {
             static::forceDeleted(function (Model $file) {
-                foreach (static::$fileSizeColumns as $column) {
+                foreach (static::getFileSizeColumns() as $column) {
                     $originalSize = $file->getOriginal($column);
                     if ($originalSize) {
                         $file->load('tenant');
@@ -68,7 +70,7 @@ trait ModelWithTenant
             });
         } else {
             static::deleted(function (Model $file) {
-                foreach (static::$fileSizeColumns as $column) {
+                foreach (static::getFileSizeColumns() as $column) {
                     $originalSize = $file->getOriginal($column);
                     if ($originalSize) {
                         $file->load('tenant');
