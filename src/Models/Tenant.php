@@ -15,17 +15,18 @@ class Tenant extends \Spatie\Multitenancy\Models\Tenant
         'disk_usage_in_bytes' => 'int',
     ];
 
-	protected static function booted(): void
-	{
-		parent::booted();
+    protected static function booted(): void
+    {
+        parent::booted();
 
-		static::updating(function ($tenant) {
-			if ($tenant->disk_usage_in_bytes < 0) {
-				$tenant->disk_usage_in_bytes = null;
-			}
-		});
+        static::updating(function ($tenant) {
+            if ($tenant->disk_usage_in_bytes < 0) {
+                $tenant->disk_usage_in_bytes = null;
+            }
+        });
 
-	}
+    }
+
     /**
      * Is there any Tenant selected
      */
