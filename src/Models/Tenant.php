@@ -43,9 +43,9 @@ class Tenant extends \Spatie\Multitenancy\Models\Tenant
 
     public function updateDiskUsage(?int $bytes): void
     {
-		if ($bytes === null) {
-			return;
-		}
+        if ($bytes === null) {
+            return;
+        }
 
         $this->disk_usage_in_bytes += $bytes;
         $this->save();
