@@ -19,9 +19,10 @@ trait ModelWithTenant
     /**
      * Name of all columns from this model that has the size of the file
      */
-	protected static function getFileSizeColumns(): array {
-		return  [];
-	}
+    protected static function getFileSizeColumns(): array
+    {
+        return [];
+    }
 
     public function __construct(array $attributes = [])
     {
