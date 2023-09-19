@@ -34,8 +34,8 @@ return [
     // if null, will deactivate the Tenant finder by domain
     'domain_class' => null,
 
-	// If set to true and a 'domain_class' is defined, will throw a 403 error if the current site domain is not find on Tenant
-	'must_find_tenant_on_domain' => false,
+    // If set to true and a 'domain_class' is defined, will throw a 403 error if the current site domain is not find on Tenant
+    'must_find_tenant_on_domain' => false,
 
     'fqdn_column' => 'fqdn',
 

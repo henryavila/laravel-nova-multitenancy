@@ -49,9 +49,9 @@ class SetTenantMiddleware
                 return $next($request);
             }
 
-			if (config('nova-multitenancy.must_find_tenant_on_domain')) {
-				abort(403, trans('Domínio não encontrado!'));
-			}
+            if (config('nova-multitenancy.must_find_tenant_on_domain')) {
+                abort(403, trans('Domínio não encontrado!'));
+            }
         }
 
         // If the user came from Tenant Selection, let's get data from session and save the tenant
