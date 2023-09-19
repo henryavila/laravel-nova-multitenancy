@@ -2,6 +2,9 @@
 
 All notable changes to `laravel-nova-multitenancy` will be documented in this file.
 
+## v3.1.0 - 2023-09-19
+Abort if domain is required and domain is not found
+
 ## v3.0.4 - 2023-09-01
 
 Fix calc of files size
