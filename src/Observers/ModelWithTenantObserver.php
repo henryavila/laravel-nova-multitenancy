@@ -18,17 +18,21 @@ class ModelWithTenantObserver
             $model->setAttribute('tenant_id', Tenant::current()->id);
         }
 
-        if ($modelHasUser && empty($model->getAttribute('user_id'))) {
-            /** @var User $authenticatedUser */
-            $authenticatedUser = Auth::user();
+        $automaticallySetModelOwner = config('nova-multitenancy.automatically_set_owner_user_for_classes') !== false;
+        if ($automaticallySetModelOwner && $modelHasUser && empty($model->getAttribute('user_id'))) {
 
-            if ($authenticatedUser) {
-                $userId = $authenticatedUser->id;
-            } else {
-                throw new Exception('The model "'.get_class($model).'" must be linked to a user. No authenticated user found');
+            if (! in_array($model::class, config('nova-multitenancy.ignore_set_owner_user_for_classes'))) {
+                /** @var User $authenticatedUser */
+                $authenticatedUser = Auth::user();
+
+                if ($authenticatedUser) {
+                    $userId = $authenticatedUser->id;
+                } else {
+                    throw new Exception('The model "'.get_class($model).'" must be linked to a user. No authenticated user found');
+                }
+
+                $model->setAttribute('user_id', $userId);
             }
-
-            $model->setAttribute('user_id', $userId);
         }
     }
 }
