@@ -42,13 +42,13 @@ return [
     // This invokable class will be executed after the Tenant has been set as current tenant
     'invoke_after_tenant_selection' => [],
 
-	// If you want to don't automatically set user_id with the auth user when creating tenant model,
-	// add in this array the classes that will not have this functionality
-	'ignore_set_owner_user_for_classes' => [],
+    // If you want to don't automatically set user_id with the auth user when creating tenant model,
+    // add in this array the classes that will not have this functionality
+    'ignore_set_owner_user_for_classes' => [],
 
-	// By default, all models that has the Trait ModelWithTenant and contains the user_id column,
-	// will have this value populated with the id of the authenticated user. If you want to disable this feature, set this to false
-	'automatically_set_owner_user_for_classes' => true,
+    // By default, all models that has the Trait ModelWithTenant and contains the user_id column,
+    // will have this value populated with the id of the authenticated user. If you want to disable this feature, set this to false
+    'automatically_set_owner_user_for_classes' => true,
 
     /*
      * This class is responsible for determining which tenant should be current
