@@ -2,7 +2,16 @@
 
 All notable changes to `laravel-nova-multitenancy` will be documented in this file.
 
+## v3.3.0 - 2024-04-11
+
+### What's Changed
+
+* Support Laravel 11 by @henryavila in https://github.com/henryavila/laravel-nova-multitenancy/pull/11
+
+**Full Changelog**: https://github.com/henryavila/laravel-nova-multitenancy/compare/v3.2.0...v3.3.0
+
 ## v3.1.0 - 2023-09-19
+
 Abort if domain is required and domain is not found
 
 ## v3.0.4 - 2023-09-01
