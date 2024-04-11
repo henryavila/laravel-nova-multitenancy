@@ -2,6 +2,10 @@
 
 All notable changes to `laravel-nova-multitenancy` will be documented in this file.
 
+## v3.3.1 - 2024-04-11
+
+Fix release
+
 ## v3.3.0 - 2024-04-11
 
 ### What's Changed
